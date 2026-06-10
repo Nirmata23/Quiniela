@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiniela Mundial 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #06132a;
+    --surface: #0d2248;
+    --surface2: #112960;
+    --gold: #d4af37;
+    --gold-light: #f0d060;
+    --red: #c0001a;
+    --white: #ffffff;
+    --muted: #7a9cc8;
+    --border: rgba(212,175,55,0.25);
+    --green: #00a550;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; }
+
+  /* ── HERO ANIMADO ── */
+  .hero {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    border-bottom: 3px solid var(--gold);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .hero-content { position: relative; z-index: 2; text-align: center; }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.4rem, 9vw, 4.2rem);
+    letter-spacing: 0.1em;
+    line-height: 1;
+    color: transparent;
+    background: linear-gradient(90deg, #a07820, #f0d060, #d4af37, #f8e88a, #a07820);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: goldShimmer 3s linear infinite;
+  }
+  @keyframes goldShimmer {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+
+  .hero-sub {
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-top: 6px;
+    animation: fadeUp 1s ease both;
+    animation-delay: 0.4s;
+  }
+  .hero-balls {
+    display: flex; gap: 10px; justify-content: center;
+    margin-top: 12px;
+    animation: fadeUp 1s ease both;
+    animation-delay: 0.6s;
+  }
+  .hball {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--gold);
+    animation: bounce 1.4s ease-in-out infinite;
+  }
+  .hball:nth-child(2) { animation-delay: 0.15s; background: white; }
+  .hball:nth-child(3) { animation-delay: 0.30s; }
+  .hball:nth-child(4) { animation-delay: 0.45s; background: white; }
+  .hball:nth-child(5) { animation-delay: 0.60s; }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); opacity: 0.5; }
+    50%      { transform: translateY(-8px); opacity: 1; }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── NOMBRE ── */
+  .nombre-section {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+    display: flex; align-items: center; gap: 0.75rem;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .nombre-section label { font-size: 0.75rem; color: var(--muted); white-space: nowrap; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .nombre-section input {
+    flex: 1; background: var(--bg); border: 1px solid var(--border);
+    color: var(--white); padding: 0.45rem 0.75rem; border-radius: 6px;
+    font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; outline: none; transition: border-color 0.2s;
+  }
+  .nombre-section input:focus { border-color: var(--gold); }
+  .nombre-section input::placeholder { color: rgba(255,255,255,0.2); font-weight: 400; }
+
+  /* ── PUNTOS ── */
+  .puntos-guia {
+    display: grid; grid-template-columns: repeat(2,1fr); gap: 6px;
+    padding: 0.6rem 1rem; background: #060f22;
+  }
+  @media(min-width:600px){ .puntos-guia { grid-template-columns: repeat(4,1fr); } }
+  .pt-badge {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.35rem 0.6rem; font-size: 0.7rem; gap: 6px;
+  }
+  .pt-badge .desc { color: var(--muted); flex: 1; }
+  .pt-badge .pts { font-weight: 700; font-size: 0.85rem; white-space: nowrap; }
+  .pts.gold { color: var(--gold); }
+  .pts.blue { color: #60aaff; }
+
+  /* ── TABS ── */
+  .tabs-wrap { background: #060f22; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+  .tabs-wrap::-webkit-scrollbar { display: none; }
+  .tabs { display: flex; gap: 4px; padding: 0.5rem 1rem; width: max-content; }
+  .tab {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.05em;
+    padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .tab:hover { color: var(--white); border-color: rgba(212,175,55,0.5); }
+  .tab.activo { background: var(--gold); color: #06132a; border-color: var(--gold); font-weight: 700; }
+
+  /* ── GRUPOS ── */
+  .grupo { display: none; padding: 0.75rem 1rem; }
+  .grupo.visible { display: block; }
+  .grupo-header {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.08em;
+    color: var(--gold); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 8px;
+  }
+  .grupo-header::after { content:''; flex:1; height:1px; background: var(--border); }
+
+  /* ── PARTIDO ── */
+  .partido {
+    background: var(--surface); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px; padding: 0.6rem 0.75rem; margin-bottom: 8px; transition: border-color 0.2s;
+  }
+  .partido.completado { border-color: rgba(212,175,55,0.35); }
+  .partido-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .grupo-badge {
+    font-size: 0.62rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.03em; flex-shrink: 0;
+  }
+  .fecha-tag { font-size: 0.68rem; color: var(--muted); flex-shrink: 0; display: flex; align-items: center; gap: 4px; }
+
+  .partido-main { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 6px; }
+
+  /* equipo con bandera */
+  .equipo-local  { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600; color: var(--white); text-align: left; }
+  .equipo-visita { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 0.82rem; font-weight: 600; color: var(--white); text-align: right; flex-direction: row-reverse; }
+
+  .flag {
+    display: inline-block; width: 22px; height: 15px; flex-shrink: 0;
+    border-radius: 2px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15);
+  }
+  .flag svg { width: 100%; height: 100%; display: block; }
+
+  .score-box {
+    display: flex; align-items: center; gap: 3px;
+    background: rgba(0,0,0,0.35); border: 1px solid var(--border);
+    border-radius: 8px; padding: 4px 6px;
+  }
+  .score-inp {
+    width: 32px; text-align: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem;
+    background: transparent; border: none; color: var(--gold-light); outline: none; padding: 0;
+    -moz-appearance: textfield;
+  }
+  .score-inp::-webkit-outer-spin-button,
+  .score-inp::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .score-inp::placeholder { color: rgba(212,175,55,0.25); }
+  .sep-score { color: var(--muted); font-size: 0.85rem; font-weight: 700; }
+
+  .resultado-tag {
+    display: inline-block; font-size: 0.62rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 20px; margin-top: 4px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .rt-local   { background: rgba(0,165,80,0.2);    color: #4ddb88; border: 1px solid rgba(0,165,80,0.4); }
+  .rt-visita  { background: rgba(26,79,160,0.2);   color: #7ab0ff; border: 1px solid rgba(26,79,160,0.4); }
+  .rt-empate  { background: rgba(212,175,55,0.15); color: var(--gold-light); border: 1px solid rgba(212,175,55,0.3); }
+  .rt-vacio   { background: transparent; color: transparent; border: 1px solid transparent; height: 18px; }
+
+  /* ── RESUMEN ── */
+  .resumen {
+    position: sticky; bottom: 0; background: var(--surface);
+    border-top: 2px solid var(--gold); padding: 0.65rem 1rem;
+    display: grid; grid-template-columns: repeat(2,1fr); gap: 6px;
+  }
+  @media(min-width:500px){ .resumen { grid-template-columns: repeat(4,1fr); } }
+  .res-item { background: var(--bg); border-radius: 8px; padding: 0.45rem 0.6rem; text-align: center; border: 1px solid var(--border); }
+  .res-label { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .res-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.35rem; color: var(--gold); line-height: 1.1; }
+
+  /* ── INSTRUCCIONES ENVIO ── */
+  .instrucciones-envio {
+    background: linear-gradient(135deg, #0d2248, #112960);
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    padding: 0.9rem 1rem;
+  }
+  .ie-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.08em;
+    color: var(--gold); margin-bottom: 0.65rem; text-align: center;
+  }
+  .ie-pasos {
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; flex-wrap: wrap;
+  }
+  .ie-paso {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.4rem 0.7rem;
+  }
+  .ie-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--gold); color: #06132a;
+    font-weight: 800; font-size: 0.75rem;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .ie-texto { font-size: 0.72rem; color: rgba(255,255,255,0.85); font-weight: 500; }
+  .ie-flecha { color: var(--muted); font-size: 1rem; font-weight: 700; }
+  @media(max-width:480px){ .ie-flecha { display: none; } .ie-pasos { flex-direction: column; align-items: stretch; } }
+
+  /* ── SHARE ── */
+  .share-bar { padding: 0.75rem 1rem; background: #060f22; display: flex; flex-direction: column; gap: 8px; }
+  .btn-share {
+    padding: 0.55rem 0.9rem;
+    border-radius: 10px; border: 1px solid var(--border); background: var(--surface);
+    color: var(--white); font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; text-align: center;
+  }
+  .btn-share:hover { background: var(--surface2); border-color: var(--gold); }
+  .btn-share.whatsapp { background: #128c7e; border-color: #25d366; }
+  .btn-share.whatsapp:hover { background: #0a7468; }
+  .btn-share.whatsapp.big {
+    width: 100%; padding: 1rem 1.2rem;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 1rem; border-radius: 12px;
+    background: linear-gradient(135deg, #128c7e, #25d366);
+    border-color: #25d366; box-shadow: 0 4px 20px rgba(37,211,102,0.25);
+  }
+  .btn-share.whatsapp.big:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(37,211,102,0.35); }
+  .btn-icon { font-size: 1.6rem; flex-shrink: 0; }
+  .btn-texts { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+  .btn-label { font-size: 0.95rem; font-weight: 700; color: white; }
+  .btn-sub { font-size: 0.7rem; color: rgba(255,255,255,0.75); font-weight: 400; }
+  .share-secundarios { display: flex; gap: 8px; }
+  .btn-share.small { flex: 1; font-size: 0.75rem; padding: 0.5rem; }
+
+  #toast {
+    position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--green); color: white; padding: 0.55rem 1.2rem;
+    border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+    opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── AUTOSAVE INDICATOR ── */
+  #autosave-badge {
+    position: fixed; top: 10px; right: 10px; z-index: 999;
+    background: rgba(0,0,0,0.75); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 10px;
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.05em;
+    display: flex; align-items: center; gap: 5px;
+    opacity: 0; transition: opacity 0.4s; pointer-events: none;
+  }
+  #autosave-badge.show { opacity: 1; }
+  #autosave-badge .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+    animation: pulse-dot 1s ease infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.4; transform: scale(0.7); }
+  }
+  #autosave-badge .dot.saving { background: var(--gold); }
+
+  /* ── CLEAR DATA BUTTON ── */
+  .btn-share.danger { background: rgba(192,0,26,0.15); border-color: var(--red); color: #ff6680; }
+  .btn-share.danger:hover { background: var(--red); color: white; }
+
+  /* Grupo colores */
+  .gA{background:#7c1c1c;color:white} .gB{background:#1a4070;color:white}
+  .gC{background:#1a6030;color:white} .gD{background:#7a5000;color:white}
+  .gE{background:#5a1a6a;color:white} .gF{background:#006060;color:white}
+  .gG{background:#8a3800;color:white} .gH{background:#006060;color:white}
+  .gI{background:#6a2050;color:white} .gJ{background:#3a7020;color:white}
+  .gK{background:#1a3070;color:white} .gL{background:#7a1040;color:white}
+</style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <canvas class="hero-canvas" id="heroCanvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-title">Quiniela Mundial 2026</div>
+    <div class="hero-sub">Fase de grupos &nbsp;·&nbsp; 72 partidos &nbsp;·&nbsp; EE.UU., Canadá &amp; México</div>
+    <div class="hero-balls">
+      <span class="hball"></span><span class="hball"></span><span class="hball"></span>
+      <span class="hball"></span><span class="hball"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ── NOMBRE ── -->
+<div class="nombre-section">
+  <label>Tu nombre</label>
+  <input type="text" id="nombreInput" placeholder="Escribe tu nombre..." maxlength="40" autocomplete="off">
+</div>
+
+<!-- ── PUNTOS ── -->
+<div class="puntos-guia">
+  <div class="pt-badge"><span class="desc">Ganador + marcador exacto</span><span class="pts gold">3 pts</span></div>
+  <div class="pt-badge"><span class="desc">Solo acertar ganador</span><span class="pts blue">2 pts</span></div>
+  <div class="pt-badge"><span class="desc">Empate + marcador exacto</span><span class="pts gold">3 pts</span></div>
+  <div class="pt-badge"><span class="desc">Solo acertar empate</span><span class="pts blue">2 pts</span></div>
+</div>
+
+<div class="tabs-wrap"><div class="tabs" id="tabs"></div></div>
+<div id="grupos"></div>
+
+<!-- INSTRUCCIONES -->
+<div class="instrucciones-envio">
+  <div class="ie-title">Como enviar tu quiniela</div>
+  <div class="ie-pasos">
+    <div class="ie-paso"><div class="ie-num">1</div><div class="ie-texto">Escribe tu nombre arriba</div></div>
+    <div class="ie-flecha">&#8594;</div>
+    <div class="ie-paso"><div class="ie-num">2</div><div class="ie-texto">Llena todos los marcadores</div></div>
+    <div class="ie-flecha">&#8594;</div>
+    <div class="ie-paso"><div class="ie-num">3</div><div class="ie-texto">Toca el boton verde de abajo</div></div>
+  </div>
+</div>
+<div class="share-bar">
+  <button class="btn-share whatsapp big" onclick="compartirWhatsApp()">
+    <span class="btn-icon">&#128172;</span>
+    <span class="btn-texts"><span class="btn-label">Enviar mi quiniela por WhatsApp</span><span class="btn-sub">Tu link con todos tus picks incluidos</span></span>
+  </button>
+  <div class="share-secundarios">
+    <button class="btn-share small" onclick="copiarLink()">&#128279; Copiar link</button>
+    <button class="btn-share small danger" onclick="borrarDatos()">&#128465; Borrar todo</button>
+  </div>
+</div>
+
+<div class="resumen">
+  <div class="res-item"><div class="res-label">Completados</div><div class="res-val" id="r-comp">0/72</div></div>
+  <div class="res-item"><div class="res-label">Local gana</div><div class="res-val" id="r-local">0</div></div>
+  <div class="res-item"><div class="res-label">Visitante gana</div><div class="res-val" id="r-visita">0</div></div>
+  <div class="res-item"><div class="res-label">Empates</div><div class="res-val" id="r-empate">0</div></div>
+</div>
+
+<div id="toast">Link copiado — pégalo donde quieras</div>
+<div id="autosave-badge"><span class="dot" id="autosave-dot"></span><span id="autosave-text">Guardado</span></div>
+
+<script>
+/* ══════════════════════════════════════
+   CANVAS HERO ANIMATION
+══════════════════════════════════════ */
+(function(){
+  const canvas = document.getElementById('heroCanvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [], lines = [];
+
+  function resize(){
+    W = canvas.width  = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  /* gradient background */
+  function drawBg(){
+    const g = ctx.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,   '#0a1e4a');
+    g.addColorStop(0.5, '#18082a');
+    g.addColorStop(1,   '#8a001a');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  /* star/particle pool */
+  function mkParticle(){
+    return {
+      x: Math.random()*W,
+      y: Math.random()*H,
+      r: Math.random()*1.4+0.3,
+      vx: (Math.random()-0.5)*0.3,
+      vy: (Math.random()-0.5)*0.3,
+      a: Math.random()
+    };
+  }
+  for(let i=0;i<80;i++) particles.push(mkParticle());
+
+  /* soccer-ball hex lines */
+  function mkLine(){
+    return {
+      x: Math.random()*W, y: Math.random()*H,
+      len: 20+Math.random()*30,
+      angle: Math.random()*Math.PI*2,
+      va: 0.003+Math.random()*0.005,
+      a: Math.random()*0.12+0.04
+    };
+  }
+  for(let i=0;i<18;i++) lines.push(mkLine());
+
+  function drawLines(){
+    lines.forEach(l=>{
+      l.angle += l.va;
+      ctx.save();
+      ctx.translate(l.x, l.y);
+      ctx.rotate(l.angle);
+      ctx.strokeStyle = `rgba(212,175,55,${l.a})`;
+      ctx.lineWidth = 1;
+      /* hexagon */
+      ctx.beginPath();
+      for(let i=0;i<6;i++){
+        const a = (i/6)*Math.PI*2;
+        i===0 ? ctx.moveTo(Math.cos(a)*l.len, Math.sin(a)*l.len)
+              : ctx.lineTo(Math.cos(a)*l.len, Math.sin(a)*l.len);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  function drawParticles(){
+    particles.forEach(p=>{
+      p.x += p.vx; p.y += p.vy;
+      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+      p.a = 0.4+0.5*Math.abs(Math.sin(Date.now()*0.001+p.x));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,255,${p.a})`;
+      ctx.fill();
+    });
+  }
+
+  function frame(){
+    drawBg();
+    drawLines();
+    drawParticles();
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+/* ══════════════════════════════════════
+   FLAGS — inline SVG per country code
+══════════════════════════════════════ */
+const FLAGS = {
+  'México': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="7.33" height="15" fill="#006847"/><rect x="7.33" width="7.34" height="15" fill="#fff"/><rect x="14.67" width="7.33" height="15" fill="#ce1126"/></svg>`,
+  'Sudáfrica': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#007a4d"/><polygon points="0,0 8,7.5 0,15" fill="#000"/><polygon points="0,1.5 6.5,7.5 0,13.5" fill="#ffb81c"/><rect y="6" width="22" height="3" fill="#fff"/><rect y="6.75" width="22" height="1.5" fill="#e03c31"/><polygon points="0,0 9,7.5 0,15 0,11.25 6,7.5 0,3.75" fill="#000"/><polygon points="0,1.5 7,7.5 0,13.5 0,11.25 5.25,7.5 0,3.75" fill="#ffb81c"/></svg>`,
+  'Corea del Sur': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#fff"/><circle cx="11" cy="7.5" r="3.5" fill="#cd2e3a"/><path d="M11,7.5 A3.5,3.5 0 0,1 7.5,7.5 A3.5,3.5 0 0,0 11,7.5Z" fill="#003478"/></svg>`,
+  'Canadá': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#fff"/><rect width="5.5" height="15" fill="#d52b1e"/><rect x="16.5" width="5.5" height="15" fill="#d52b1e"/><polygon points="11,2.5 11.8,5 14.5,5 12.3,6.5 13.1,9 11,7.5 8.9,9 9.7,6.5 7.5,5 10.2,5" fill="#d52b1e"/></svg>`,
+  'Catar': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="6" height="15" fill="#fff"/><polygon points="6,0 22,0 22,15 6,15 9,11.25 6,7.5 9,3.75" fill="#8d1b3d"/></svg>`,
+  'Suiza': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#d52b1e"/><rect x="9" y="3" width="4" height="9" fill="#fff"/><rect x="6" y="6" width="10" height="3" fill="#fff"/></svg>`,
+  'Brasil': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#009c3b"/><polygon points="11,1.5 21,7.5 11,13.5 1,7.5" fill="#fedf00"/><circle cx="11" cy="7.5" r="3" fill="#002776"/><rect x="7.5" y="7" width="7" height="1" fill="#fff" transform="rotate(-10,11,7.5)"/></svg>`,
+  'Marruecos': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#c1272d"/><polygon points="11,4.5 11.9,7.2 14.7,7.2 12.5,8.8 13.3,11.5 11,9.8 8.7,11.5 9.5,8.8 7.3,7.2 10.1,7.2" fill="none" stroke="#006233" stroke-width="0.7"/></svg>`,
+  'Haití': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="7.5" fill="#00209f"/><rect y="7.5" width="22" height="7.5" fill="#d21034"/></svg>`,
+  'Escocia': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#003399"/><line x1="0" y1="0" x2="22" y2="15" stroke="#fff" stroke-width="3"/><line x1="22" y1="0" x2="0" y2="15" stroke="#fff" stroke-width="3"/></svg>`,
+  'EE.UU.': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#b22234"/><rect y="1.15" width="22" height="1.15" fill="#fff"/><rect y="2.31" width="22" height="1.15" fill="#b22234"/><rect y="3.46" width="22" height="1.15" fill="#fff"/><rect y="4.62" width="22" height="1.15" fill="#b22234"/><rect y="5.77" width="22" height="1.15" fill="#fff"/><rect y="6.92" width="22" height="1.15" fill="#b22234"/><rect y="8.08" width="22" height="1.15" fill="#fff"/><rect y="9.23" width="22" height="1.15" fill="#b22234"/><rect y="10.38" width="22" height="1.15" fill="#fff"/><rect y="11.54" width="22" height="1.15" fill="#b22234"/><rect y="12.69" width="22" height="1.15" fill="#fff"/><rect y="13.85" width="22" height="1.15" fill="#b22234"/><rect width="9" height="8.08" fill="#3c3b6e"/></svg>`,
+  'Paraguay': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="5" fill="#d52b1e"/><rect y="5" width="22" height="5" fill="#fff"/><rect y="10" width="22" height="5" fill="#0038a8"/></svg>`,
+  'Australia': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#00008b"/><rect width="11" height="7.5" fill="#00008b"/><line x1="0" y1="0" x2="11" y2="7.5" stroke="#fff" stroke-width="2.5"/><line x1="11" y1="0" x2="0" y2="7.5" stroke="#fff" stroke-width="2.5"/><line x1="0" y1="0" x2="11" y2="7.5" stroke="#cc0000" stroke-width="1.5"/><line x1="11" y1="0" x2="0" y2="7.5" stroke="#cc0000" stroke-width="1.5"/></svg>`,
+  'España': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#c60b1e"/><rect y="3.75" width="22" height="7.5" fill="#ffc400"/></svg>`,
+  'Vietnam': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#da251d"/><polygon points="11,3 12.2,6.8 16,6.8 13,9 14.2,12.8 11,10.6 7.8,12.8 9,9 6,6.8 9.8,6.8" fill="#ffff00"/></svg>`,
+  'Países Bajos': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="5" fill="#ae1c28"/><rect y="5" width="22" height="5" fill="#fff"/><rect y="10" width="22" height="5" fill="#21468b"/></svg>`,
+  'Arabia Saudita': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#006c35"/><rect y="11" width="22" height="4" fill="#006c35"/><text x="11" y="9" text-anchor="middle" font-size="4" fill="white" font-family="serif">السعودية</text></svg>`,
+  'Francia': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="7.33" height="15" fill="#002395"/><rect x="7.33" width="7.34" height="15" fill="#fff"/><rect x="14.67" width="7.33" height="15" fill="#ed2939"/></svg>`,
+  'Colombia': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="7.5" fill="#fcd116"/><rect y="7.5" width="22" height="3.75" fill="#003893"/><rect y="11.25" width="22" height="3.75" fill="#ce1126"/></svg>`,
+  'Bulgaria': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="5" fill="#fff"/><rect y="5" width="22" height="5" fill="#00966e"/><rect y="10" width="22" height="5" fill="#d62612"/></svg>`,
+  'Portugal': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="8" height="15" fill="#006600"/><rect x="8" width="14" height="15" fill="#ff0000"/><circle cx="8" cy="7.5" r="2.5" fill="#ffff00" stroke="#003399" stroke-width="0.5"/></svg>`,
+  'Angola': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="7.5" fill="#cc0000"/><rect y="7.5" width="22" height="7.5" fill="#000"/><text x="11" y="8.8" text-anchor="middle" font-size="5" fill="#ffff00" font-family="sans-serif">⚙</text></svg>`,
+  'Alemania': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="5" fill="#000"/><rect y="5" width="22" height="5" fill="#dd0000"/><rect y="10" width="22" height="5" fill="#ffce00"/></svg>`,
+  'Senegal': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="7.33" height="15" fill="#00853f"/><rect x="7.33" width="7.34" height="15" fill="#fdef42"/><rect x="14.67" width="7.33" height="15" fill="#e31b23"/><polygon points="11,4.5 11.8,7.2 14.5,7.2 12.3,8.8 13.1,11.5 11,9.8 8.9,11.5 9.7,8.8 7.5,7.2 10.2,7.2" fill="#00853f"/></svg>`,
+  'Uruguay': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#fff"/><rect y="1.67" width="22" height="1.67" fill="#75aadb"/><rect y="5" width="22" height="1.67" fill="#75aadb"/><rect y="8.33" width="22" height="1.67" fill="#75aadb"/><rect y="11.67" width="22" height="1.67" fill="#75aadb"/><rect width="9" height="8.33" fill="#fff"/><circle cx="4.5" cy="4.17" r="2" fill="#f6b40e"/></svg>`,
+  'Bielorrusia': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="10" fill="#cf101a"/><rect y="10" width="22" height="5" fill="#007300"/><rect width="3" height="15" fill="#fff"/><rect width="1.5" height="15" fill="#cf101a"/></svg>`,
+  'Irak': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="5" fill="#ce1126"/><rect y="5" width="22" height="5" fill="#fff"/><rect y="10" width="22" height="5" fill="#000"/><text x="11" y="9" text-anchor="middle" font-size="4.5" fill="#007a3d">كوفية</text></svg>`,
+  'Noruega': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#ef2b2d"/><rect x="5.5" width="3" height="15" fill="#fff"/><rect y="6" width="22" height="3" fill="#fff"/><rect x="6" width="2" height="15" fill="#002868"/><rect y="6.5" width="22" height="2" fill="#002868"/></svg>`,
+  'Serbia': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="5" fill="#c6363c"/><rect y="5" width="22" height="5" fill="#0c4076"/><rect y="10" width="22" height="5" fill="#fff"/></svg>`,
+  'Costa Rica': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="3" fill="#002b7f"/><rect y="3" width="22" height="3" fill="#fff"/><rect y="6" width="22" height="3" fill="#ce1126"/><rect y="9" width="22" height="3" fill="#fff"/><rect y="12" width="22" height="3" fill="#002b7f"/></svg>`,
+  'Argentina': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="5" fill="#74acdf"/><rect y="5" width="22" height="5" fill="#fff"/><rect y="10" width="22" height="5" fill="#74acdf"/><circle cx="11" cy="7.5" r="1.8" fill="#f6b40e"/></svg>`,
+  'Argelia': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="11" height="15" fill="#006233"/><rect x="11" width="11" height="15" fill="#fff"/><circle cx="12" cy="7.5" r="2.8" fill="#d21034"/><circle cx="13" cy="7.5" r="2.8" fill="#fff"/></svg>`,
+  'Austria': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="5" fill="#ed2939"/><rect y="5" width="22" height="5" fill="#fff"/><rect y="10" width="22" height="5" fill="#ed2939"/></svg>`,
+  'Jordania': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="5" fill="#007a3d"/><rect y="5" width="22" height="5" fill="#fff"/><rect y="10" width="22" height="5" fill="#000"/><polygon points="0,0 9,7.5 0,15" fill="#ce1126"/><circle cx="4" cy="7.5" r="1" fill="#fff"/></svg>`,
+  'RD Congo': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#007fff"/><line x1="0" y1="15" x2="22" y2="0" stroke="#f7d618" stroke-width="3"/><rect width="22" height="3" fill="#ce1126"/></svg>`,
+  'Turquía': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#e30a17"/><circle cx="9" cy="7.5" r="3" fill="#fff"/><circle cx="10.2" cy="7.5" r="2.4" fill="#e30a17"/><polygon points="14,7.5 12.5,6 12.5,9" fill="#fff"/><polygon points="15.5,7.5 13.5,5.8 13.5,9.2" fill="#fff" transform="translate(0.5,0)"/></svg>`,
+  'Níger': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="5" fill="#e05206"/><rect y="5" width="22" height="5" fill="#fff"/><rect y="10" width="22" height="5" fill="#0db02b"/><circle cx="11" cy="7.5" r="2" fill="#e05206"/></svg>`,
+  'Inglaterra': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#fff"/><rect x="9.5" width="3" height="15" fill="#cf142b"/><rect y="6" width="22" height="3" fill="#cf142b"/></svg>`,
+  'Croacia': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="5" fill="#171796"/><rect y="5" width="22" height="5" fill="#fff"/><rect y="10" width="22" height="5" fill="#ee3524"/><rect x="8.5" y="3" width="5" height="9" fill="#fff"/><rect x="8.5" y="3" width="1.67" height="3" fill="#ee3524"/><rect x="10.17" y="3" width="1.67" height="3" fill="#fff"/><rect x="11.83" y="3" width="1.67" height="3" fill="#ee3524"/><rect x="8.5" y="6" width="1.67" height="3" fill="#fff"/><rect x="10.17" y="6" width="1.67" height="3" fill="#ee3524"/><rect x="11.83" y="6" width="1.67" height="3" fill="#fff"/></svg>`,
+  'Ghana': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="5" fill="#006b3f"/><rect y="5" width="22" height="5" fill="#fcd116"/><rect y="10" width="22" height="5" fill="#ce1126"/><polygon points="11,4.5 11.9,7.2 14.7,7.2 12.5,8.8 13.3,11.5 11,9.8 8.7,11.5 9.5,8.8 7.3,7.2 10.1,7.2" fill="#000"/></svg>`,
+  'Panamá': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#fff"/><rect width="11" height="7.5" fill="#fff"/><rect x="11" y="7.5" width="11" height="7.5" fill="#fff"/><rect width="11" height="7.5" fill="#db021d" opacity="0"/><rect x="11" y="7.5" width="11" height="7.5" fill="#011e96" opacity="0"/><polygon points="5.5,1 6.4,3.8 9.3,3.8 7,5.4 7.9,8.2 5.5,6.5 3.2,8.2 4.1,5.4 1.8,3.8 4.6,3.8" fill="#db021d"/><polygon points="16.5,7.5 17.4,10.3 20.2,10.3 18,11.9 18.9,14.7 16.5,13 14.2,14.7 15.1,11.9 12.8,10.3 15.6,10.3" fill="#011e96"/><rect width="11" height="7.5" fill="#db021d" opacity="0.08"/><rect x="11" y="7.5" width="11" height="7.5" fill="#011e96" opacity="0.08"/></svg>`,
+  'Eu. Repechaje 1': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#003399"/><circle cx="11" cy="7.5" r="4" fill="none" stroke="#ffcc00" stroke-width="0.8"/><text x="11" y="9.5" text-anchor="middle" font-size="4" fill="#ffcc00">UEFA</text></svg>`,
+  'Eu. Repechaje 2': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#003399"/><circle cx="11" cy="7.5" r="4" fill="none" stroke="#ffcc00" stroke-width="0.8"/><text x="11" y="9.5" text-anchor="middle" font-size="4" fill="#ffcc00">UEFA</text></svg>`,
+  'Eu. Repechaje 3': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#003399"/><circle cx="11" cy="7.5" r="4" fill="none" stroke="#ffcc00" stroke-width="0.8"/><text x="11" y="9.5" text-anchor="middle" font-size="4" fill="#ffcc00">UEFA</text></svg>`,
+  'Eu. Repechaje 4': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#003399"/><circle cx="11" cy="7.5" r="4" fill="none" stroke="#ffcc00" stroke-width="0.8"/><text x="11" y="9.5" text-anchor="middle" font-size="4" fill="#ffcc00">UEFA</text></svg>`,
+  'Rep. Intercont.': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#1a1a2e"/><circle cx="11" cy="7.5" r="4" fill="none" stroke="#e94560" stroke-width="0.8"/><text x="11" y="9.5" text-anchor="middle" font-size="3.5" fill="#e94560">INTER</text></svg>`,
+  'Rep. Intercont. 1': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#1a1a2e"/><circle cx="11" cy="7.5" r="4" fill="none" stroke="#e94560" stroke-width="0.8"/><text x="11" y="9.5" text-anchor="middle" font-size="3.5" fill="#e94560">INTER</text></svg>`,
+};
+
+function getFlag(name){
+  const svg = FLAGS[name];
+  if(!svg) return `<span class="flag"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#334"/><text x="11" y="10" text-anchor="middle" font-size="7" fill="#aaa">?</text></svg></span>`;
+  return `<span class="flag">${svg}</span>`;
+}
+
+/* ══════════════════════════════════════
+   DATA
+══════════════════════════════════════ */
+const GRUPOS = [
+  {id:'A', partidos:[
+    {f:'11 Jun',l:'México',v:'Sudáfrica'},
+    {f:'11 Jun',l:'Corea del Sur',v:'Eu. Repechaje 4'},
+    {f:'18 Jun',l:'Eu. Repechaje 4',v:'Sudáfrica'},
+    {f:'18 Jun',l:'México',v:'Corea del Sur'},
+    {f:'24 Jun',l:'Eu. Repechaje 4',v:'México'},
+    {f:'24 Jun',l:'Sudáfrica',v:'Corea del Sur'},
+  ]},
+  {id:'B', partidos:[
+    {f:'12 Jun',l:'Canadá',v:'Eu. Repechaje 1'},
+    {f:'13 Jun',l:'Catar',v:'Suiza'},
+    {f:'18 Jun',l:'Suiza',v:'Eu. Repechaje 1'},
+    {f:'18 Jun',l:'Canadá',v:'Catar'},
+    {f:'25 Jun',l:'Suiza',v:'Canadá'},
+    {f:'25 Jun',l:'Eu. Repechaje 1',v:'Catar'},
+  ]},
+  {id:'C', partidos:[
+    {f:'13 Jun',l:'Brasil',v:'Marruecos'},
+    {f:'13 Jun',l:'Haití',v:'Escocia'},
+    {f:'19 Jun',l:'Marruecos',v:'Haití'},
+    {f:'19 Jun',l:'Brasil',v:'Escocia'},
+    {f:'25 Jun',l:'Marruecos',v:'Escocia'},
+    {f:'25 Jun',l:'Brasil',v:'Haití'},
+  ]},
+  {id:'D', partidos:[
+    {f:'12 Jun',l:'EE.UU.',v:'Paraguay'},
+    {f:'14 Jun',l:'Australia',v:'Eu. Repechaje 3'},
+    {f:'20 Jun',l:'Paraguay',v:'Eu. Repechaje 3'},
+    {f:'20 Jun',l:'EE.UU.',v:'Australia'},
+    {f:'25 Jun',l:'Paraguay',v:'Australia'},
+    {f:'25 Jun',l:'Eu. Repechaje 3',v:'EE.UU.'},
+  ]},
+  {id:'E', partidos:[
+    {f:'14 Jun',l:'España',v:'Vietnam'},
+    {f:'14 Jun',l:'Países Bajos',v:'Arabia Saudita'},
+    {f:'20 Jun',l:'Arabia Saudita',v:'Vietnam'},
+    {f:'20 Jun',l:'España',v:'Países Bajos'},
+    {f:'26 Jun',l:'Arabia Saudita',v:'España'},
+    {f:'26 Jun',l:'Vietnam',v:'Países Bajos'},
+  ]},
+  {id:'F', partidos:[
+    {f:'15 Jun',l:'Francia',v:'Eu. Repechaje 2'},
+    {f:'15 Jun',l:'Colombia',v:'Bulgaria'},
+    {f:'21 Jun',l:'Eu. Repechaje 2',v:'Bulgaria'},
+    {f:'21 Jun',l:'Francia',v:'Colombia'},
+    {f:'26 Jun',l:'Eu. Repechaje 2',v:'Colombia'},
+    {f:'26 Jun',l:'Bulgaria',v:'Francia'},
+  ]},
+  {id:'G', partidos:[
+    {f:'15 Jun',l:'Portugal',v:'Angola'},
+    {f:'15 Jun',l:'Alemania',v:'Rep. Intercont.'},
+    {f:'21 Jun',l:'Rep. Intercont.',v:'Angola'},
+    {f:'21 Jun',l:'Alemania',v:'Portugal'},
+    {f:'26 Jun',l:'Alemania',v:'Angola'},
+    {f:'26 Jun',l:'Rep. Intercont.',v:'Portugal'},
+  ]},
+  {id:'H', partidos:[
+    {f:'16 Jun',l:'Senegal',v:'Rep. Intercont. 1'},
+    {f:'16 Jun',l:'Uruguay',v:'Bielorrusia'},
+    {f:'22 Jun',l:'Rep. Intercont. 1',v:'Bielorrusia'},
+    {f:'22 Jun',l:'Senegal',v:'Uruguay'},
+    {f:'26 Jun',l:'Rep. Intercont. 1',v:'Senegal'},
+    {f:'26 Jun',l:'Bielorrusia',v:'Uruguay'},
+  ]},
+  {id:'I', partidos:[
+    {f:'16 Jun',l:'Irak',v:'Noruega'},
+    {f:'16 Jun',l:'Serbia',v:'Costa Rica'},
+    {f:'22 Jun',l:'Noruega',v:'Costa Rica'},
+    {f:'22 Jun',l:'Irak',v:'Serbia'},
+    {f:'27 Jun',l:'Noruega',v:'Serbia'},
+    {f:'27 Jun',l:'Costa Rica',v:'Irak'},
+  ]},
+  {id:'J', partidos:[
+    {f:'17 Jun',l:'Argentina',v:'Argelia'},
+    {f:'17 Jun',l:'Austria',v:'Jordania'},
+    {f:'23 Jun',l:'Argelia',v:'Jordania'},
+    {f:'23 Jun',l:'Argentina',v:'Austria'},
+    {f:'27 Jun',l:'Argelia',v:'Austria'},
+    {f:'27 Jun',l:'Jordania',v:'Argentina'},
+  ]},
+  {id:'K', partidos:[
+    {f:'17 Jun',l:'Portugal',v:'RD Congo'},
+    {f:'17 Jun',l:'Turquía',v:'Níger'},
+    {f:'23 Jun',l:'RD Congo',v:'Níger'},
+    {f:'23 Jun',l:'Portugal',v:'Turquía'},
+    {f:'27 Jun',l:'RD Congo',v:'Turquía'},
+    {f:'27 Jun',l:'Níger',v:'Portugal'},
+  ]},
+  {id:'L', partidos:[
+    {f:'17 Jun',l:'Inglaterra',v:'Croacia'},
+    {f:'18 Jun',l:'Ghana',v:'Panamá'},
+    {f:'24 Jun',l:'Croacia',v:'Panamá'},
+    {f:'24 Jun',l:'Inglaterra',v:'Ghana'},
+    {f:'27 Jun',l:'Croacia',v:'Ghana'},
+    {f:'27 Jun',l:'Panamá',v:'Inglaterra'},
+  ]},
+];
+
+const picks = {};
+
+function buildUI(){
+  const tabsEl = document.getElementById('tabs');
+  const gruposEl = document.getElementById('grupos');
+  GRUPOS.forEach((g, gi) => {
+    const tab = document.createElement('button');
+    tab.className = 'tab'+(gi===0?' activo':'');
+    tab.textContent = 'Grupo '+g.id;
+    tab.onclick = () => {
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('activo'));
+      tab.classList.add('activo');
+      document.querySelectorAll('.grupo').forEach(b=>b.classList.remove('visible'));
+      document.getElementById('g-'+g.id).classList.add('visible');
+    };
+    tabsEl.appendChild(tab);
+
+    const bloque = document.createElement('div');
+    bloque.className = 'grupo'+(gi===0?' visible':'');
+    bloque.id = 'g-'+g.id;
+
+    const gh = document.createElement('div');
+    gh.className = 'grupo-header';
+    gh.textContent = 'Grupo '+g.id;
+    bloque.appendChild(gh);
+
+    g.partidos.forEach((p, pi) => {
+      const key = g.id+'-'+pi;
+      if(!picks[key]) picks[key] = {gl:'',gv:''};
+
+      const div = document.createElement('div');
+      div.className = 'partido';
+      div.id = 'p-'+key;
+
+      /* top row */
+      const top = document.createElement('div');
+      top.className = 'partido-top';
+      const badge = document.createElement('span');
+      badge.className = 'grupo-badge g'+g.id;
+      badge.textContent = 'G'+g.id;
+
+      const fechaTag = document.createElement('span');
+      fechaTag.className = 'fecha-tag';
+
+      /* calendar icon SVG */
+      fechaTag.innerHTML = `<svg width="11" height="11" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="2" width="12" height="11" rx="2" stroke="#7a9cc8" stroke-width="1.5"/><line x1="1" y1="5.5" x2="13" y2="5.5" stroke="#7a9cc8" stroke-width="1.2"/><line x1="4.5" y1="1" x2="4.5" y2="4" stroke="#7a9cc8" stroke-width="1.5" stroke-linecap="round"/><line x1="9.5" y1="1" x2="9.5" y2="4" stroke="#7a9cc8" stroke-width="1.5" stroke-linecap="round"/></svg> ${p.f}`;
+      top.appendChild(badge);
+      top.appendChild(fechaTag);
+
+      /* main row */
+      const main = document.createElement('div');
+      main.className = 'partido-main';
+
+      const eL = document.createElement('div');
+      eL.className = 'equipo-local';
+      eL.innerHTML = getFlag(p.l) + `<span>${p.l}</span>`;
+
+      const scoreBox = document.createElement('div');
+      scoreBox.className = 'score-box';
+      const iL = document.createElement('input');
+      iL.type='number'; iL.min='0'; iL.max='20';
+      iL.className='score-inp'; iL.placeholder='–'; iL.value=picks[key].gl;
+      iL.setAttribute('aria-label','Goles '+p.l);
+      const sep = document.createElement('span');
+      sep.className='sep-score'; sep.textContent='—';
+      const iV = document.createElement('input');
+      iV.type='number'; iV.min='0'; iV.max='20';
+      iV.className='score-inp'; iV.placeholder='–'; iV.value=picks[key].gv;
+      iV.setAttribute('aria-label','Goles '+p.v);
+      scoreBox.appendChild(iL); scoreBox.appendChild(sep); scoreBox.appendChild(iV);
+
+      const eV = document.createElement('div');
+      eV.className = 'equipo-visita';
+      eV.innerHTML = getFlag(p.v) + `<span>${p.v}</span>`;
+
+      main.appendChild(eL); main.appendChild(scoreBox); main.appendChild(eV);
+
+      /* result tag */
+      const tag = document.createElement('span');
+      tag.className = 'resultado-tag rt-vacio';
+
+      const dot = (color) => `<svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="${color}"/></svg>`;
+
+      function refresh(){
+        picks[key].gl = iL.value;
+        picks[key].gv = iV.value;
+        const r = getResult(picks[key].gl, picks[key].gv);
+        if(!r){ tag.className='resultado-tag rt-vacio'; tag.innerHTML=''; div.classList.remove('completado'); }
+        else if(r==='L'){ tag.className='resultado-tag rt-local'; tag.innerHTML=dot('#4ddb88')+' '+p.l+' gana'; div.classList.add('completado'); }
+        else if(r==='V'){ tag.className='resultado-tag rt-visita'; tag.innerHTML=dot('#7ab0ff')+' '+p.v+' gana'; div.classList.add('completado'); }
+        else { tag.className='resultado-tag rt-empate'; tag.innerHTML=dot('#f0d060')+' Empate '+picks[key].gl+'-'+picks[key].gv; div.classList.add('completado'); }
+        updateResumen();
+        saveToStorage();
+      }
+      iL.oninput = refresh; iV.oninput = refresh;
+
+      div.appendChild(top); div.appendChild(main); div.appendChild(tag);
+      bloque.appendChild(div);
+      refresh();
+    });
+    gruposEl.appendChild(bloque);
+  });
+}
+
+function getResult(gl,gv){
+  if(gl===''||gv==='') return null;
+  const l=parseInt(gl),v=parseInt(gv);
+  if(isNaN(l)||isNaN(v)) return null;
+  return l>v?'L':v>l?'V':'E';
+}
+
+function updateResumen(){
+  let comp=0,loc=0,vis=0,emp=0;
+  Object.values(picks).forEach(s=>{
+    const r=getResult(s.gl,s.gv);
+    if(r){comp++;r==='L'?loc++:r==='V'?vis++:emp++;}
+  });
+  document.getElementById('r-comp').textContent=comp+'/72';
+  document.getElementById('r-local').textContent=loc;
+  document.getElementById('r-visita').textContent=vis;
+  document.getElementById('r-empate').textContent=emp;
+}
+
+const STORAGE_KEY = 'quiniela_mundial_2026';
+let autosaveTimer = null;
+
+function showAutosaveBadge(saving){
+  const badge = document.getElementById('autosave-badge');
+  const dot   = document.getElementById('autosave-dot');
+  const text  = document.getElementById('autosave-text');
+  if(saving){
+    dot.className = 'dot saving';
+    text.textContent = 'Guardando…';
+  } else {
+    dot.className = 'dot';
+    text.textContent = 'Guardado automáticamente';
+  }
+  badge.classList.add('show');
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(()=>badge.classList.remove('show'), 2500);
+}
+
+function getDataObj(){
+  const nombre = document.getElementById('nombreInput').value;
+  const data = {n: nombre, p: {}};
+  Object.entries(picks).forEach(([k,v])=>{
+    if(v.gl!==''||v.gv!=='') data.p[k]=[v.gl,v.gv];
+  });
+  return data;
+}
+
+function saveToStorage(){
+  showAutosaveBadge(true);
+  const data = getDataObj();
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+  try{ history.replaceState(null,'','#'+btoa(encodeURIComponent(JSON.stringify(data)))); }catch(e){}
+  setTimeout(()=>showAutosaveBadge(false), 600);
+}
+
+// Keep saveToURL as alias for backward compat (share buttons)
+function saveToURL(){ saveToStorage(); }
+
+function applyData(data){
+  if(data.n) document.getElementById('nombreInput').value = data.n;
+  if(data.p){
+    Object.entries(data.p).forEach(([k, val])=>{
+      const gl = Array.isArray(val) ? val[0] : val.gl || '';
+      const gv = Array.isArray(val) ? val[1] : val.gv || '';
+      if(picks[k]){ picks[k].gl=gl; picks[k].gv=gv; }
+      const iL=document.querySelector('#p-'+k+' .score-inp:first-child');
+      const iV=document.querySelector('#p-'+k+' .score-inp:last-child');
+      if(iL){ iL.value=gl; iL.dispatchEvent(new Event('input')); }
+      if(iV){ iV.value=gv; iV.dispatchEvent(new Event('input')); }
+    });
+  }
+}
+
+function loadFromStorage(){
+  // URL hash takes priority (shared link), then localStorage
+  const hash = location.hash.slice(1);
+  if(hash){
+    try{
+      const data = JSON.parse(decodeURIComponent(atob(hash)));
+      applyData(data);
+      // Also save to localStorage so it persists after navigation
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+      return;
+    }catch(e){}
+  }
+  // Fall back to localStorage
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const data = JSON.parse(raw);
+      applyData(data);
+    }
+  }catch(e){}
+}
+
+function borrarDatos(){
+  if(!confirm('¿Seguro que quieres borrar toda tu quiniela? Esta acción no se puede deshacer.')) return;
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  try{ history.replaceState(null,'','#'); }catch(e){}
+  location.reload();
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function copiarLink(){
+  saveToURL();
+  navigator.clipboard.writeText(location.href)
+    .then(()=>showToast('Link copiado — pégalo donde quieras'))
+    .catch(()=>prompt('Copia este link:',location.href));
+}
+
+function compartirWhatsApp(){
+  const nombre=document.getElementById('nombreInput').value.trim();
+  if(!nombre){
+    showToast('\u26a0\ufe0f Primero escribe tu nombre arriba');
+    document.getElementById('nombreInput').focus();
+    return;
+  }
+  const comp=Object.values(picks).filter(s=>s.gl!==''&&s.gv!=='').length;
+  if(comp===0){
+    showToast('\u26a0\ufe0f Llena al menos un partido primero');
+    return;
+  }
+  saveToStorage();
+  const msg=encodeURIComponent(
+    '\uD83C\uDFC6 Quiniela Mundial 2026\n'+
+    '\uD83D\uDC64 '+nombre+'\n'+
+    '\u26BD Partidos completados: '+comp+'/72\n\n'+
+    'Ver mi quiniela completa aqui:\n'+location.href
+  );
+  window.open('https://wa.me/?text='+msg,'_blank');
+}
+
+function descargarHTML(){
+  saveToURL();
+  const html=document.documentElement.outerHTML;
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  const nombre=document.getElementById('nombreInput').value||'quiniela';
+  a.download=nombre.replace(/\s+/g,'_')+'_Mundial2026.html';
+  a.click();
+}
+
+document.getElementById('nombreInput').addEventListener('input',saveToStorage);
+buildUI();
+loadFromStorage();
+</script>
+</body>
+</html>
